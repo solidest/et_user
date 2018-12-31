@@ -1,0 +1,23 @@
+{
+  "name": "et_user",
+  "version": "1.0.0",
+  "description": "user manager api",
+  "main": "api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solidest/et_user.git"
+  },
+  "author": "solidest",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/solidest/et_user/issues"
+  },
+  "homepage": "https://github.com/solidest/et_user#readme",
+  "dependencies": {
+    "koa-body": "^4.0.6",
+    "seneca": "^3.8.0-rc3"
+  }
+}
