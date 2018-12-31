@@ -21,35 +21,46 @@ const srv_user = Seneca.client({type: 'tcp', pin: {srv:'user'}});
  * @apiName users-new
  * @apiGroup userGroup
  *
- * @apiParam {string} username 用户名
- * @apiParam {string} password 用户口令
- * @apiParam {string} [ugroupid] 所属的用户组
- *
- * @apiSuccess (Success 200) {String} userid 用户id标识
- * 
- * @apiParamExample {json} Request-Example:
+ * @apiParam {String} username 用户名
+ * @apiParam {String} password 用户口令
+ * @apiParam {String} [ugroupid] 所属的用户组
+ * @apiParamExample {json} Request-Body-Example:
  *    {
  *        "username": "张三"，
  *        "password": "123abcdf!"
  *    }
+ *  
+ * @apiSuccess (Success) {String} userid 用户id标识
+ * @apiSuccessExample {json} Response-Success-Example:
+ *    HTTP/1.1 200 OK
+ *    {
+ *        "userid": "192846732874" 
+ *    }
  * 
- * @apiSuccessExample {json} Success-Response:
- *     HTTP/1.1 200 OK
- *     {
- *       "userid": "192846732874"
- *     }
+ * @apiError (Error) {Number} errorcode 错误代码
+ * @apiError (Error) {String} error 错误信息
+ * @apiErrorExample  {json} Response-Error-Example:
+ *    HTTP/1.1 400 Bad Request
+ *    {
+ *        "errorcode":400,
+ *        "error":"必须提供用户名与口令"
+ *    }
  */
 router.post('/users/', koaBody(), async (ctx) => {
-
-    //console.log(ctx.request.body);
     return new Promise(function(resolve, reject) {
         srv_user.act({srv:'user', fun:'create'}, ctx.request.body, function(err, res){
             if(err) {
                 console.log(err);
-                ctx.response.body =  err;
                 reject();
             }
+            if(res.error) {
+                console.log(res);
+                ctx.response.status = res.errorcode || 500;
+                ctx.response.body = res;
+                resolve();
+            }       
             else {
+                ctx.response.status = 200;
                 ctx.response.body = res;
                 resolve();
             }
@@ -59,25 +70,45 @@ router.post('/users/', koaBody(), async (ctx) => {
 
 /**
  * @apiVersion 0.1.0
- * @api {delete} /users/ 删除用户
+ * @api {delete} /users/{userid} 删除用户
  * @apiName users-remove
  * @apiGroup userGroup
  *
- * @apiParam {string} userid 用户id标识
+ * @apiParam {string} userid 【URL路径参数】用户id标识
  *
- * @apiSuccess (Success 200) {String} userid 已经删除用户的id标识
+ * @apiSuccess (Success) {String} userid 已经删除用户的id标识
+ * @apiSuccessExample {json} Response-Success-Example:
+ *    HTTP/1.1 200 OK
+ *    {
+ *        "userid": "192846732874" 
+ *    }
+ * 
+ * @apiError (Error) {Number} errorcode 错误代码
+ * @apiError (Error) {String} error 错误信息
+ * @apiErrorExample  {json} Response-Error-Example:
+ *    HTTP/1.1 500 Internal Server Error
+ *    {
+ *        "errorcode":500,
+ *        "error":"未知错误"
+ *    }
  */
-router.delete('/users/', koaBody(), async (ctx) => {
+router.delete('/users/:id', async (ctx) => {
     return new Promise(function(resolve, reject) {
-        srv_user.act({ srv:'user', fun:'remove'}, ctx.request.body, function(err, res){
+        srv_user.act({ srv:'user', fun:'remove', userid:ctx.params.id}, function(err, res){
             if(err) {
                 console.log(err);
-                ctx.response.body =  err;
                 reject();
             }
-            else {
+            if(res.error) {
+                ctx.response.status = res.errorcode || 500;
                 ctx.response.body = res;
-                resolve();            
+                resolve();
+            }       
+            else {
+                console.log(res);
+                ctx.response.status = 200;
+                ctx.response.body = res;
+                resolve();
             }
         });
     });

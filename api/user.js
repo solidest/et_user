@@ -10,12 +10,18 @@ module.exports = function auth(options) {
 
     function create(msg, reply) {
         console.log("user/create invoke by " + JSON.stringify(msg));
-        reply(null, {userid: 'new user id'});
+        if(msg.username && msg.password)
+            reply({userid: 'new user id'});
+        else
+            reply({errorcode: 400, error:'必须提供用户名与口令'});
     }
 
     function remove(msg, reply) {
         console.log("user/remove invoke by " + JSON.stringify(msg));
-        reply(null, {userid: 'removed user id'});
+        if(msg.userid)
+            reply({userid: 'deleted user id'});
+        else
+            reply({errorcode: 500, error:'未知错误'});
     }
 
     function update(msg, reply) {
